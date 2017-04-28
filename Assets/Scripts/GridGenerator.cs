@@ -44,24 +44,26 @@ public class GridGenerator : MonoBehaviour
 
         /*================= Debug Info =================*/
 
+        float newX;
+        float newY;
         // need to calculate position of node 0, 0        
         if (IsOdd(xSize))
         {
-            float newX = nodeSpacing * (xSize - 1) / 2;
+            newX = nodeSpacing * (xSize - 1) / 2;
             newX = -newX;
             Debug.Log("newX " + newX);
 
         }
         if (IsOdd(ySize))
         {
-            float newY = nodeSpacing * (ySize - 1) / 2;
+            newY = nodeSpacing * (ySize - 1) / 2;
             newY = -newY;
             Debug.Log("newY " + newY);
         }
         else
         {
-            float newX = nodeSpacing * xSize / 2;
-            float newY = nodeSpacing * ySize / 2;
+            newX = nodeSpacing * xSize / 2;
+            newY = nodeSpacing * ySize / 2;
             newX = -newX;
             newY = -newY;
             Debug.Log("newX " + newX);
