@@ -3,54 +3,92 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public class GridGenerator : MonoBehaviour
-{
-    public Vector2 gridSize;
+{    
+    public int xSize;
+    public int ySize;
+    public float nodeSpacing;
     public GameObject groundPlanePrefab;
     public GameObject nodePrefab;
     public GameObject playerPrefab;
-    
+    public List<GameObject> nodes;
+    public GameObject[,] nodez = new GameObject[5, 5];
+
     private GameObject actualPlayerObject;
     private GameObject playerStartNode;
-    private List<GameObject> nodes;
-    private int nodeCount;
 
-    // this function needs instatiate, add to list, and set a key of some sort
-    // to every node scaled by the gridSize Vector 2 variable
-    private List<GameObject> GenerateGrid()
+    public GameObject GetNode(int x, int y)
+    {
+        var node = nodez[x, y];
+        return node;
+    }
+    public static bool IsOdd(float value)
+    {
+        return value % 2 != 0;
+    }
+    public void GenerateGrid()
+    {    
+        // ground plane spawn
+        Instantiate<GameObject>(groundPlanePrefab, this.transform);
+            
+        // loop by x size
+        for (int i = 0; i <= xSize - 1; i++)
+        {
+            // loop by y size
+            for (int j = 0; j <= ySize - 1; j++)
+            {
+                // Instantiate a new node and add it to the 2D array
+                var newNode = Instantiate<GameObject>(nodePrefab, this.transform);
+                nodez[i, j] = newNode;
+            }
+        }
+
+        /*================= Debug Info =================*/
+
+        // need to calculate position of node 0, 0        
+        if (IsOdd(xSize))
+        {
+            float newX = nodeSpacing * (xSize - 1) / 2;
+            newX = -newX;
+            Debug.Log("newX " + newX);
+
+        }
+        if (IsOdd(ySize))
+        {
+            float newY = nodeSpacing * (ySize - 1) / 2;
+            newY = -newY;
+            Debug.Log("newY " + newY);
+        }
+        else
+        {
+            float newX = nodeSpacing * xSize / 2;
+            float newY = nodeSpacing * ySize / 2;
+            newX = -newX;
+            newY = -newY;
+            Debug.Log("newX " + newX);
+            Debug.Log("newY " + newY);
+        }
+    }
+
+    // instatiates 25 node objects without a loop
+    private List<GameObject> RedundantGenerateGrid()
     {
         // store in temp variable to me modified
         List<GameObject> tmpNodes = nodes;
 
         // ground plane spawn
-        var newGroundPlane = Instantiate<GameObject>(groundPlanePrefab, this.transform);
-
-        // scale ground plane by grid size
-        // currently not working as intended
-        //if (gridSize.x != 5 || gridSize.y != 5)
-        //{
-        //    var xSize = gridSize.x;
-        //    var ySize = gridSize.y;
-
-        //    var xScale = (float)xSize * 2.75;
-        //    var yScale = (float)xSize * 2.75;
-
-        //    Vector3 newScale = new Vector3((float)xScale, 1, (float)yScale);
-        //    newGroundPlane.transform.localScale = newScale;
-        //}
+        Instantiate<GameObject>(groundPlanePrefab, this.transform);
 
         // setting up local variables for position
         Vector3 newPos = nodePrefab.transform.position;
         var tmpx = newPos.x;
-        var tmpy = newPos.y;
+        var tmpy = newPos.y + 0.1f;
         var tmpz = newPos.z;
 
         // gets the outside boundaries of the groundPlane
-        float maxX = ((gridSize.x - 1) / 2) * 22.5f;
-        float maxY = ((gridSize.y - 1) / 2) * 22.5f;
-        float minX = ((gridSize.x - 1) / 2) * -22.5f;
-        float minY = ((gridSize.y - 1) / 2) * -22.5f;
-
-        /*===================== Start Manual Node Generatation =========================*/
+        float maxX = ((xSize - 1) / 2) * nodeSpacing;
+        float maxY = ((ySize - 1) / 2) * nodeSpacing;
+        float minX = ((xSize - 1) / 2) * -nodeSpacing;
+        float minY = ((ySize - 1) / 2) * -nodeSpacing;
 
         /*===================== X = 0 =========================*/
 
@@ -210,19 +248,7 @@ public class GridGenerator : MonoBehaviour
         newPos = new Vector3(tmpx - minX, tmpy, tmpz - minY);
         var newNode44 = Instantiate<GameObject>(nodePrefab, this.transform);
         newNode44.transform.position = newPos;
-        tmpNodes.Add(newNode44);
-
-        /*===================== End Manual Node Generatation =========================*/
-
-        //looped node spawn
-        //only works in same location currently
-        while (nodes.Count != nodeCount)
-        {
-            newPos = new Vector3(tmpx - maxX + maxX, tmpy, tmpz - maxY + maxY);
-            var newNode = Instantiate<GameObject>(nodePrefab, this.transform);
-            newNode.transform.position = newPos;
-            tmpNodes.Add(newNode);
-        }
+        tmpNodes.Add(newNode44);        
 
         return tmpNodes;
     }
@@ -242,13 +268,13 @@ public class GridGenerator : MonoBehaviour
                 var nodeZ = node.transform.position.z;
                 // within 22.5 of the center of node on x axis
                 // if mouse x is <= node x + 22.5 and  mouse x is >= node z - 22.5
-                if (mouseX <= nodeX + 22.5 && mouseX >= nodeX - 22.5)
+                if (mouseX <= nodeX + nodeSpacing && mouseX >= nodeX - nodeSpacing)
                 {
                     pass0 = true;
                 }
                 // within 22.5 of the center of node on y/z axis
                 // if mouse y is <= node y + 22.5 and  mouse y is >= node z - 22.5
-                if (mouseY <= nodeZ + 22.5 && mouseY >= nodeZ - 22.5)
+                if (mouseY <= nodeZ + 22.5 && mouseY >= nodeZ - nodeSpacing)
                 {
                     pass1 = true;
                 }
@@ -270,21 +296,37 @@ public class GridGenerator : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        /*================ using List<GameObject> nodes ================*/
+
         // initialize node list
         nodes = new List<GameObject>();
 
-        // store the amount of nodes in list
-        nodeCount = (int)gridSize.x * (int)gridSize.y;       
-
         // Generate the groundPlane and node objects
-        nodes = GenerateGrid();        
+        nodes = RedundantGenerateGrid();
+        //Debug.Log(nodes.Count);
 
-        // random player player start node
+        // fixed player start node
+        playerStartNode = nodes[0];
+
+        // random player start node
         int index = Random.Range(0, nodes.Count);
         playerStartNode = nodes[index];
 
-        // fixed player player start node
-        //playerStartNode = nodes[0];
+        /*================ using GameObject[,] nodez ================*/
+
+        //// Generate the groundPlane and node objects
+        //GenerateGrid();
+        ////Debug.Log(nodez.Length);
+
+        //// fixed player start node
+        //playerStartNode = GetNode(0, 0);
+
+        //// random player player start node
+        //int xIndex = Random.Range(0, xSize);
+        //int yIndex = Random.Range(0, ySize);
+        ////playerStartNode = GetNode(xIndex, yIndex);
+
+        /*=========================================================*/
 
         // instantiate the player at start node position
         var nodex = playerStartNode.transform.position.x;
