@@ -29,36 +29,21 @@ public class GridGenerator : MonoBehaviour
     {    
         // ground plane spawn
         Instantiate<GameObject>(groundPlanePrefab, this.transform);
-            
-        // loop by x size
-        for (int i = 0; i <= xSize - 1; i++)
-        {
-            // loop by y size
-            for (int j = 0; j <= ySize - 1; j++)
-            {
-                // Instantiate a new node and add it to the 2D array
-                var newNode = Instantiate<GameObject>(nodePrefab, this.transform);
-                nodez[i, j] = newNode;
-            }
-        }
 
-        /*================= Debug Info =================*/
+        float newX = 0f;
+        float newY = 0f;
 
-        float newX;
-        float newY;
         // need to calculate position of node 0, 0        
         if (IsOdd(xSize))
         {
             newX = nodeSpacing * (xSize - 1) / 2;
             newX = -newX;
-            Debug.Log("newX " + newX);
 
         }
         if (IsOdd(ySize))
         {
             newY = nodeSpacing * (ySize - 1) / 2;
             newY = -newY;
-            Debug.Log("newY " + newY);
         }
         else
         {
@@ -66,8 +51,34 @@ public class GridGenerator : MonoBehaviour
             newY = nodeSpacing * ySize / 2;
             newX = -newX;
             newY = -newY;
-            Debug.Log("newX " + newX);
-            Debug.Log("newY " + newY);
+        }
+
+        GameObject tmpNodePrefab = nodePrefab;
+        var pos = new Vector3(newX, 0.1f, newY);
+        tmpNodePrefab.transform.localPosition = pos;
+
+        // loop by x size
+        for (int i = 0; i <= xSize - 1; i++)
+        {
+            // loop by y size
+            for (int j = 0; j <= ySize - 1; j++)
+            {
+                // Instantiate a new node and add it to the 2D array
+                var newNode = Instantiate<GameObject>(tmpNodePrefab, this.transform);
+                nodez[i, j] = newNode;
+            }
+        }
+        
+        // loop by x size
+        for (int i = 0; i <= xSize - 1; i++)
+        {
+            // loop by y size
+            for (int j = 0; j <= ySize - 1; j++)
+            {
+                GameObject node = GetNode(i, j);
+                var pos1 = new Vector3(i * nodeSpacing, 0.1f, j * nodeSpacing);
+                node.transform.localPosition = pos1;
+            }
         }
     }
 
@@ -300,33 +311,33 @@ public class GridGenerator : MonoBehaviour
     {
         /*================ using List<GameObject> nodes ================*/
 
-        // initialize node list
-        nodes = new List<GameObject>();
+        //// initialize node list
+        //nodes = new List<GameObject>();
 
-        // Generate the groundPlane and node objects
-        nodes = RedundantGenerateGrid();
-        //Debug.Log(nodes.Count);
+        //// Generate the groundPlane and node objects
+        //nodes = RedundantGenerateGrid();
+        ////Debug.Log(nodes.Count);
 
-        // fixed player start node
-        playerStartNode = nodes[0];
+        //// fixed player start node
+        //playerStartNode = nodes[0];
 
-        // random player start node
-        int index = Random.Range(0, nodes.Count);
-        playerStartNode = nodes[index];
+        //// random player start node
+        //int index = Random.Range(0, nodes.Count);
+        //playerStartNode = nodes[index];
 
         /*================ using GameObject[,] nodez ================*/
 
-        //// Generate the groundPlane and node objects
-        //GenerateGrid();
-        ////Debug.Log(nodez.Length);
+        // Generate the groundPlane and node objects
+        GenerateGrid();
+        //Debug.Log(nodez.Length);
 
-        //// fixed player start node
-        //playerStartNode = GetNode(0, 0);
+        // fixed player start node
+        playerStartNode = GetNode(0, 0);
 
-        //// random player player start node
-        //int xIndex = Random.Range(0, xSize);
-        //int yIndex = Random.Range(0, ySize);
-        ////playerStartNode = GetNode(xIndex, yIndex);
+        // random player player start node
+        int xIndex = Random.Range(0, xSize);
+        int yIndex = Random.Range(0, ySize);
+        //playerStartNode = GetNode(xIndex, yIndex);
 
         /*=========================================================*/
 
